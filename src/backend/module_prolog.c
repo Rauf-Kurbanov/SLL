@@ -1,15 +1,25 @@
 #include "runtime.h"
 
-#define DECL(n) \
+#define CO_DECL(n) \
   static inline Object create_object_##n(CtrId const ctr_id
 #define ARG(n) \
       , Object const _##n
-#define BEGIN(n) ) { \
-    Word *const cell = new_cell(n); \
+#define CO_BEGIN(n) ) { \
+    Word *const cell = sll_new_cell(n); \
     cell[0] = SLL_make_header((Word)ctr_id, n);
 #define INIT(n) \
     cell[n] = (Word)_##n;
-#define END \
+#define CO_END \
+    return cell; \
+  }
+
+#define CT_DECL(n) \
+  static inline Object create_thunk_##n(Applicator const app
+#define CT_BEGIN(n) ) { \
+    Word *const cell = sll_new_cell(n + 1); \
+    cell[0] = SLL_make_header((Word)SllThunkId, n);
+#define CT_END(n) \
+    cell[n + 1] = (Word)app; \
     return cell; \
   }
 
@@ -31,23 +41,32 @@
 #define REP_15(macro) REP_14(macro) macro(15)
 
 #define CREATE_OBJECT_DEF(n) \
-  DECL(n) REP_##n(ARG) BEGIN(n) \
+  CO_DECL(n) REP_##n(ARG) CO_BEGIN(n) \
     REP_##n(INIT) \
-  END
+  CO_END
 
-CREATE_OBJECT_DEF(0)
-CREATE_OBJECT_DEF(1)
-CREATE_OBJECT_DEF(2)
-CREATE_OBJECT_DEF(3)
-CREATE_OBJECT_DEF(4)
-CREATE_OBJECT_DEF(5)
-CREATE_OBJECT_DEF(6)
-CREATE_OBJECT_DEF(7)
-CREATE_OBJECT_DEF(8)
-CREATE_OBJECT_DEF(9)
-CREATE_OBJECT_DEF(10)
-CREATE_OBJECT_DEF(11)
-CREATE_OBJECT_DEF(12)
-CREATE_OBJECT_DEF(13)
-CREATE_OBJECT_DEF(14)
-CREATE_OBJECT_DEF(15)
+#define CREATE_THUNK_DEF(n) \
+  CT_DECL(n) REP_##n(ARG) CT_BEGIN(n) \
+    REP_##n(INIT) \
+  CT_END(n)
+
+#define DEFS(n) \
+  CREATE_OBJECT_DEF(n) \
+  CREATE_THUNK_DEF(n)
+
+DEFS(0)
+DEFS(1)
+DEFS(2)
+DEFS(3)
+DEFS(4)
+DEFS(5)
+DEFS(6)
+DEFS(7)
+DEFS(8)
+DEFS(9)
+DEFS(10)
+DEFS(11)
+DEFS(12)
+DEFS(13)
+DEFS(14)
+DEFS(15)
