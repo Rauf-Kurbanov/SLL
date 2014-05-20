@@ -104,7 +104,7 @@ ostap (
   *)   
 
 class lexer s =
-  let skip  = Skip.create [Skip.whitespaces " \n\t\r"] in
+  let skip  = Skip.create [Skip.whitespaces " \n\t\r"; Skip.nestedComment "(*" "*)"] in
   let ident = Str.regexp "[a-z][a-zA-Z0-9]*" in
   let const = Str.regexp "[0-9]+" in
   let cnt = Str.regexp "[A-Z][a-zA-Z0-9]*" in
