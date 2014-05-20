@@ -22,8 +22,8 @@ let rec make_list = function
   | []       -> `Ctr ("Nil", [])
   | hd :: tl -> `Ctr ("Cons", [hd; make_list tl])
 
-let program =
-  let gdefs = [
+
+let gdefs = [
     (* Subtraction for Non-Negative integers *)
     "snn"  $ ("Z" +> [],    ["y"]) => `GCall ("neg", `Var "y", []);
     "snn"  $ ("S" +> ["x"], ["y"]) => `GCall ("sud", `Var "y", [`Var "x"]);
@@ -162,8 +162,9 @@ let program =
           `GCall ("len", `GCall ("hailstone", `Var "x", []), []);
           `Var "lenlist"])]);
     "hslengths2" $ ("Z" +> [], ["x"; "lenlist"]) => `Var "lenlist";
-  ] in
-  let fdefs = [
+  ] 
+
+let fdefs = [
     (* Subtraction *)
     "sub" >$ ["x"; "y"] >= `GCall ("add", `Var "x", [`GCall ("neg", `Var "y", [])]);
 
@@ -200,7 +201,9 @@ let program =
 
     "hslengths" >$ ["n"] >=
       `GCall ("hslengths2", `Var "n", [make_nat 1; make_list []]);
-  ] in
+  ]
+
+let program =
   let n = 5 in
   let show_len = 3 in
   let mult = 5 in
