@@ -6,6 +6,16 @@ open Sll
 
 let ident = ostap (n:IDENT {Token.repr n})
 let cnt = ostap (c:CNT {Token.repr c})
+let const = ostap (c:CONST {int_of_string (Token.repr c)})
+
+let rec make_nat = function
+  | 0 -> `Ctr ("Z", [])
+  | n -> `Ctr ("S", [make_nat (n - 1)])
+
+let make_int z =
+  if z < 0
+  then `Ctr ("N", [make_nat (-z)])
+  else (make_nat z)
 
 let list_of_opt = function
   | Some xs -> xs
@@ -65,6 +75,7 @@ ostap (
       constructor[expr_parser]
     | fun_call[expr_parser]
     | v:ident  { `Var v }
+    | c:const           {make_int c} 
   ;
   args_list[expr_parser]: -"(" list0[expr_parser] -")"
   ;
@@ -83,8 +94,6 @@ let rec pure_decl_pure_expr_parser = pure_decl pure_expr_parser
 let pure_term_pure_expr_parser = pure_term pure_expr_parser
 let pure_program_parser = program_parser pure_decl_pure_expr_parser pure_term_pure_expr_parser
 
-
-
 (*
 ostap (
   branch_parser[expr_parser][case_num]: 
@@ -94,10 +103,10 @@ ostap (
     -"case" expr:expr_parser -"of" bs:branch_parser[expr_parser][case_num + 1]+ { 
   *)   
 
-
 class lexer s =
   let skip  = Skip.create [Skip.whitespaces " \n\t\r"] in
   let ident = Str.regexp "[a-z][a-zA-Z0-9]*" in
+  let const = Str.regexp "[0-9]+" in
   let cnt = Str.regexp "[A-Z][a-zA-Z0-9]*" in
   object (self)
 
@@ -105,6 +114,7 @@ class lexer s =
 
     method skip p c = skip s p c
     method getIDENT = self#get "identifier" ident
+    method getCONST = self#get "constant" const
     method getCNT   = self#get "constructor" cnt
 
   end
