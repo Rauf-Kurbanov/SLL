@@ -19,9 +19,9 @@ and ostap (
   primary: 
    -"-" p:primary   {`GCall ("neg", p, [])}
   | -"(" num_expression -")"    
-  | camlp5_sucks
+  | ff
   )
-and camlp5_sucks x = expression num_expression x
+and ff x = expression num_expression x
 
 ostap (
   arithm_term[expr_parser][declarations]:
